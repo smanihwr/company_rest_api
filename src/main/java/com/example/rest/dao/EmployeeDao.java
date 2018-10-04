@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EmployeeDao {
@@ -21,8 +22,8 @@ public class EmployeeDao {
         return repository.findAll();
     }
 
-    public Employee getOne(Long empId) {
-        return repository.getOne(empId);
+    public Optional<Employee> findById(Long empId) {
+        return repository.findById(empId);
     }
 
     public void delete(Employee emp) {

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/company")
@@ -27,46 +28,44 @@ public class EmployeeController {
     }
 
     @GetMapping("/employees/{id}")
-    public ResponseEntity<Employee> getEmployeeById(@PathVariable(value = "id") Long id) {
-        Employee employee =  employeeDao.getOne(id);
-
-        if(null == employee) {
+    public ResponseEntity<Optional<Employee>> getEmployeeById(@PathVariable(value = "id") Long id) {
+        Optional<Employee> employee = employeeDao.findById(id);
+        if (employee.isPresent()) {
+            return ResponseEntity.ok().body(employee);
+        } else {
             return ResponseEntity.notFound().build();
         }
-
-        return  ResponseEntity.ok().body(employee);
     }
 
     @PutMapping("/employees/{id}")
     public ResponseEntity<Employee> updateEmployee(
             @PathVariable(value = "id") Long id,
             @Valid @RequestBody Employee empDetails) {
-        Employee employee = employeeDao.getOne(id);
 
-        if(null == employee) {
+        Optional<Employee> employee = employeeDao.findById(id);
+        if (employee.isPresent()) {
+            Employee e = employee.get();
+            e.setName(empDetails.getName());
+            e.setDesignation(empDetails.getDesignation());
+            e.setExpertise(empDetails.getExpertise());
+            Employee savedEmployee = employeeDao.save(e);
+
+            return ResponseEntity.ok().body(savedEmployee);
+        } else {
             return ResponseEntity.notFound().build();
         }
-
-        employee.setName(empDetails.getName());
-        employee.setDesignation(empDetails.getDesignation());
-        employee.setExpertise(empDetails.getExpertise());
-
-        Employee savedEmployee = employeeDao.save(employee);
-
-        return ResponseEntity.ok().body(savedEmployee);
-
     }
 
     @DeleteMapping("/employees/{id}")
     public ResponseEntity<Employee> delete(@PathVariable(value = "id") Long id) {
-        Employee employee = employeeDao.getOne(id);
 
-        if(null == employee) {
+        Optional<Employee> employee = employeeDao.findById(id);
+        if (employee.isPresent()) {
+            employeeDao.delete(employee.get());
+            return ResponseEntity.ok().build();
+        } else {
             return ResponseEntity.notFound().build();
         }
 
-        employeeDao.delete(employee);
-
-        return ResponseEntity.ok().build();
     }
 }
